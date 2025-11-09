@@ -20,6 +20,9 @@ export default function ClientList() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
+  // Nova opção de ordenação: 'alphabetical' por padrão
+  const [orderBy, setOrderBy] = useState<'alphabetical' | 'registration'>('alphabetical');
+
   // Estado de expansão dos cards (set de ids)
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
 
@@ -34,7 +37,7 @@ export default function ClientList() {
 
   useEffect(() => {
     loadClients();
-  }, [user]);
+  }, [user, orderBy]); // recarrega ao mudar usuário ou opção de ordenação
 
   useEffect(() => {
     // Ao mudar a busca, volta para a primeira página
@@ -66,11 +69,15 @@ export default function ClientList() {
   const loadClients = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('clients')
-        .select('*')
-        .order('registration_date', { ascending: false });
+      
+      let query = supabase.from('clients').select('*');
+      if (orderBy === 'alphabetical') {
+        query = query.order('full_name', { ascending: true });
+      } else {
+        query = query.order('registration_date', { ascending: false });
+      }
 
+      const { data, error } = await query;
       if (error) throw error;
       setClients(data || []);
     } catch (error) {
@@ -181,9 +188,10 @@ export default function ClientList() {
             className="border rounded-lg px-3 py-2 text-sm w-64 focus:outline-none focus:ring-2 focus:ring-blue-200"
           />
 
+          {/* Itens por página */}
           <select
             value={pageSize}
-            onChange={(e) => setPageSize(Number(e.target.value))}
+            onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }}
             className="border rounded-lg px-2 py-2 text-sm"
             title="Itens por página"
           >
@@ -191,6 +199,17 @@ export default function ClientList() {
             <option value={10}>10 / página</option>
             <option value={20}>20 / página</option>
             <option value={50}>50 / página</option>
+          </select>
+
+          {/* Novo: seleção de ordenação */}
+          <select
+            value={orderBy}
+            onChange={(e) => { setOrderBy(e.target.value as any); setPage(1); }}
+            className="border rounded-lg px-2 py-2 text-sm"
+            title="Ordenação"
+          >
+            <option value="alphabetical">Alfabética (A → Z)</option>
+            <option value="registration">Data de registro (mais novos)</option>
           </select>
 
           <button
