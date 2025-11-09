@@ -1,8 +1,11 @@
 import { supabase } from '../lib/supabase';
 import { safeFileName } from './validation';
+import avatarPath from '../assets/avatar.png'; 
 
-export const BUCKET_CLIENTS = 'clients_avatar'; // ajuste se necessário
-export const FALLBACK_AVATAR = 'src/assets/avatar.png';
+
+export const FALLBACK_AVATAR: string = avatarPath;
+
+export const BUCKET_CLIENTS = 'clients_avatar';
 
 export const extractStoragePath = (urlOrPath: string, bucketName = BUCKET_CLIENTS) => {
   if (!urlOrPath) return '';
@@ -20,6 +23,7 @@ export const getSignedUrl = async (path: string, expiresInSec = 60 * 60 * 24) =>
   return data?.signedUrl as string;
 };
 
+/** Resolve a URL final da imagem do cliente */
 export const resolveClientImageUrl = async (foto_url?: string | null) => {
   if (!foto_url) return FALLBACK_AVATAR;
   try {
@@ -39,6 +43,7 @@ export const uploadClientImage = async (userId: string, localFile: File, prefix?
   return { path: filePath };
 };
 
+/** Remove arquivo do storage */
 export const removeFile = async (path: string) => {
   if (!path) return;
   await supabase.storage.from(BUCKET_CLIENTS).remove([path]);
