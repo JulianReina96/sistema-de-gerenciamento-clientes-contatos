@@ -18,6 +18,7 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-input-mask": "^2.0.4",
+    "supabase": "^2.58.5",
     "sweetalert2": "^11.26.3"
   },
   "devDependencies": {

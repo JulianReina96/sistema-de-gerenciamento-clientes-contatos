@@ -1,48 +1,21 @@
 /*
-  # Sistema de Cadastro de Clientes e Contatos
+  # Sistema de Cadastro de Clientes e Contatos + Suporte a Uploads via Supabase Storage
 
-  1. Novas Tabelas
-    - `clients` (clientes)
-      - `id` (uuid, chave primária)
-      - `user_id` (uuid, referência ao usuário autenticado)
-      - `full_name` (text, nome completo do cliente)
-      - `emails` (text[], lista de emails)
-      - `phones` (text[], lista de telefones)
-      - `registration_date` (date, data de registro)
-      - `created_at` (timestamp)
-      - `updated_at` (timestamp)
-    
-    - `contacts` (contatos)
-      - `id` (uuid, chave primária)
-      - `client_id` (uuid, referência ao cliente)
-      - `user_id` (uuid, referência ao usuário autenticado)
-      - `full_name` (text, nome completo do contato)
-      - `emails` (text[], lista de emails)
-      - `phones` (text[], lista de telefones)
-      - `created_at` (timestamp)
-      - `updated_at` (timestamp)
+  Este migration cria toda a base de dados do sistema e configura o Supabase Storage
+  para permitir o upload público de imagens no bucket `clients_avatar`.
 
-  2. Segurança (RLS)
-    - Habilitar RLS em ambas as tabelas
-    - Políticas para clientes:
-      - Usuários autenticados podem ver seus próprios clientes
-      - Usuários autenticados podem inserir seus próprios clientes
-      - Usuários autenticados podem atualizar seus próprios clientes
-      - Usuários autenticados podem deletar seus próprios clientes
-    - Políticas para contatos:
-      - Usuários autenticados podem ver contatos de seus clientes
-      - Usuários autenticados podem inserir contatos em seus clientes
-      - Usuários autenticados podem atualizar contatos de seus clientes
-      - Usuários autenticados podem deletar contatos de seus clientes
-
-  3. Índices
-    - Índice em `clients.user_id` para consultas rápidas
-    - Índice em `contacts.client_id` para joins eficientes
-    - Índice em `contacts.user_id` para consultas rápidas
-
-  4. Funções
-    - Trigger para atualizar `updated_at` automaticamente
+  ## Inclui:
+  1. Tabelas de clientes e contatos
+  2. RLS e políticas de segurança completas
+  3. Triggers automáticas de atualização de timestamp
+  4. Índices para performance
+  5. Criação automática do bucket `clients_avatar`
+  6. Políticas completas de INSERT/SELECT/UPDATE compatíveis com Supabase Storage
 */
+
+------------------------------
+-- 1. Tabelas principais
+------------------------------
 
 -- Criar tabela de clientes
 CREATE TABLE IF NOT EXISTS clients (
@@ -69,7 +42,10 @@ CREATE TABLE IF NOT EXISTS contacts (
   updated_at timestamptz DEFAULT now() NOT NULL
 );
 
--- Criar função para atualizar updated_at
+------------------------------
+-- 2. Função e triggers para updated_at
+------------------------------
+
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -78,7 +54,6 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
--- Criar triggers para atualizar updated_at
 DROP TRIGGER IF EXISTS update_clients_updated_at ON clients;
 CREATE TRIGGER update_clients_updated_at
   BEFORE UPDATE ON clients
@@ -91,12 +66,18 @@ CREATE TRIGGER update_contacts_updated_at
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
 
--- Criar índices
+------------------------------
+-- 3. Índices
+------------------------------
+
 CREATE INDEX IF NOT EXISTS clients_user_id_idx ON clients(user_id);
 CREATE INDEX IF NOT EXISTS contacts_client_id_idx ON contacts(client_id);
 CREATE INDEX IF NOT EXISTS contacts_user_id_idx ON contacts(user_id);
 
--- Habilitar RLS
+------------------------------
+-- 4. Segurança (RLS)
+------------------------------
+
 ALTER TABLE clients ENABLE ROW LEVEL SECURITY;
 ALTER TABLE contacts ENABLE ROW LEVEL SECURITY;
 
@@ -157,3 +138,66 @@ CREATE POLICY "Users can delete contacts of own clients"
   ON contacts FOR DELETE
   TO authenticated
   USING (auth.uid() = user_id);
+
+------------------------------
+-- 5. Configuração automática do Supabase Storage
+------------------------------
+
+-- Criar bucket público se não existir
+INSERT INTO storage.buckets (id, name, public)
+SELECT 'clients_avatar', 'clients_avatar', true
+WHERE NOT EXISTS (
+  SELECT 1 FROM storage.buckets WHERE id = 'clients_avatar'
+);
+
+
+
+
+------------------------------
+-- 6. Políticas completas para o bucket clients_avatar
+------------------------------
+
+-- Inserção (upload)
+CREATE POLICY "Allow public uploads for clients_avatar"
+ON storage.objects
+FOR INSERT
+TO public
+WITH CHECK (
+  bucket_id = 'clients_avatar'
+  AND (metadata IS NULL OR TRUE)
+  AND (owner IS NULL OR TRUE)
+  AND (owner_id IS NULL OR TRUE)
+  AND (user_metadata IS NULL OR TRUE)
+  AND (version IS NULL OR TRUE)
+  AND (name IS NOT NULL)
+);
+
+-- Leitura pública
+CREATE POLICY "Allow public read for clients_avatar"
+ON storage.objects
+FOR SELECT
+TO public
+USING (bucket_id = 'clients_avatar');
+
+-- Atualização (upsert)
+CREATE POLICY "Allow public update for clients_avatar"
+ON storage.objects
+FOR UPDATE
+TO public
+USING (bucket_id = 'clients_avatar')
+WITH CHECK (bucket_id = 'clients_avatar');
+
+-- Exclusão opcional (para desenvolvedores/testes)
+
+CREATE POLICY "Allow public delete for clients_avatar"
+ON storage.objects
+FOR DELETE
+TO public
+USING (bucket_id = 'clients_avatar');
+
+------------------------------
+-- ✅ Após rodar este migration:
+-- - Bucket `clients_avatar` será criado e público
+-- - Uploads via Supabase Storage funcionarão imediatamente
+-- - Nenhuma configuração adicional é necessária
+------------------------------
