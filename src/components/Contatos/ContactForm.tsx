@@ -76,17 +76,16 @@ export default function ContactForm({ clientId, contact, onSubmit, onClose }: Co
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-gray-800">
-            {contact ? 'Editar Contato' : 'Novo Contato'}
-          </h2>
+      {/* modal responsivo: largura adaptativa, altura limitada e scroll interno */}
+      <div className="bg-white rounded-xl shadow-xl w-full max-w-md sm:max-w-lg md:max-w-2xl max-h-[85vh] overflow-y-auto">
+        <div className="sticky top-0 bg-white border-b border-gray-200 px-4 sm:px-6 py-3 flex items-center justify-between">
+          <h2 className="text-2xl font-bold text-gray-800">{contact ? 'Editar Contato' : 'Novo Contato'}</h2>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition">
             <X className="w-6 h-6" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Nome Completo *</label>
             <input
@@ -108,7 +107,7 @@ export default function ContactForm({ clientId, contact, onSubmit, onClose }: Co
             </div>
             <div className="space-y-2">
               {emails.map((email, index) => (
-                <div key={index} className="flex gap-2">
+                <div key={index} className="flex flex-col sm:flex-row gap-2">
                   <input
                     type="email"
                     value={email}
@@ -119,7 +118,7 @@ export default function ContactForm({ clientId, contact, onSubmit, onClose }: Co
                     className="flex-1 px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                   {emails.length > 1 && (
-                    <button type="button" onClick={() => removeEmail(index)} className="text-red-600 hover:text-red-700">
+                    <button type="button" onClick={() => removeEmail(index)} className="self-start sm:self-center text-red-600 hover:text-red-700">
                       <Trash2 className="w-5 h-5" />
                     </button>
                   )}
@@ -137,14 +136,14 @@ export default function ContactForm({ clientId, contact, onSubmit, onClose }: Co
             </div>
             <div className="space-y-2">
               {phones.map((phone, index) => (
-                <div key={index} className="flex gap-2">
+                <div key={index} className="flex flex-col sm:flex-row gap-2">
                   <InputMask mask={masks[index] || maskFor('')} value={phone} onChange={(e) => handlePhoneChange(index, e.target.value)}>
                     {(inputProps: any) => (
                       <input {...inputProps} required={index === 0} className="flex-1 px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="(00) 00000-0000" />
                     )}
                   </InputMask>
                   {phones.length > 1 && (
-                    <button type="button" onClick={() => removePhone(index)} className="text-red-600 hover:text-red-700">
+                    <button type="button" onClick={() => removePhone(index)} className="self-start sm:self-center text-red-600 hover:text-red-700">
                       <Trash2 className="w-5 h-5" />
                     </button>
                   )}
@@ -153,9 +152,9 @@ export default function ContactForm({ clientId, contact, onSubmit, onClose }: Co
             </div>
           </div>
 
-          <div className="flex gap-3 pt-4">
-            <button type="button" onClick={onClose} className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition">Cancelar</button>
-            <button type="submit" disabled={loading} className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition">
+          <div className="flex flex-col sm:flex-row gap-3 pt-2">
+            <button type="button" onClick={onClose} className="w-full sm:w-auto px-4 py-2 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition">Cancelar</button>
+            <button type="submit" disabled={loading} className="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition">
               {loading ? 'Salvando...' : 'Salvar'}
             </button>
           </div>

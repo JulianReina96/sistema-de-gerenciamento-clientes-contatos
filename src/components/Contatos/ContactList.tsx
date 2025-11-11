@@ -293,15 +293,15 @@ export default function ContactList() {
   }
 
   return (
-    <div className="flex gap-6">
-      {/* Coluna esquerda: A-Z com clients e seus contatos (agenda por cliente) */}
-      <div className="w-96 bg-white rounded-xl shadow-sm p-4 overflow-auto max-h-[80vh]">
+    // container responsivo: empilha em mobile, evita overflow horizontal
+    <div className="flex flex-col sm:flex-row gap-6 max-w-full mx-auto px-4 sm:px-6 lg:px-8 overflow-x-hidden">
+      {/* Coluna esquerda: largura adaptativa em breakpoints, com scroll interno */}
+      <div className="w-full sm:w-80 md:w-96 bg-white rounded-xl shadow-sm p-4 overflow-auto max-h-[80vh]">
         <div className="flex items-center justify-between mb-3">
           <div>
             <h2 className="text-lg font-semibold text-gray-800">Agenda (Clientes)</h2>
             <p className="text-sm text-gray-600">{clients.length} clientes</p>
           </div>
-
         </div>
 
         <div className="mb-3">
@@ -411,19 +411,16 @@ export default function ContactList() {
         </div>
       </div>
 
-      {/* Painel direito: detalhes do contato selecionado */}
-      {/* min-w-0 permite que o painel direito encolha dentro do flex e não expanda horizontalmente */}
+      {/* Painel direito: ocupa o restante, min-w-0 para evitar overflow */}
       <div className="flex-1 min-w-0">
         {!selectedContact ? (
-          <div className="bg-white rounded-xl shadow-sm p-8">
+          <div className="bg-white rounded-xl shadow-sm p-6 sm:p-8">
             <p className="text-gray-600">Selecione um contato dentro de um cliente à esquerda para ver os detalhes</p>
           </div>
         ) : (
           <>
-            {/* Card do CLIENTE (cabeçalho do contato) */}
             <div className="bg-white rounded-xl shadow-sm p-4 mb-4 flex items-center gap-4">
-              <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0 border border-gray-200">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
+              <div className="w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0 border border-gray-200">
                 <img
                   src={selectedClientAvatar || selectedContactClient?.foto_url || FALLBACK_AVATAR}
                   alt={selectedContactClient?.full_name || 'cliente'}
@@ -442,19 +439,10 @@ export default function ContactList() {
               </div>
             </div>
 
-            {/* Card do CONTATO (abaixo do cabeçalho do cliente) */}
-            <div className="bg-white rounded-xl shadow-sm p-6">
-              <div className="flex items-start justify-between">
-                {/* limita a largura do bloco do título para respeitar a coluna esquerda (w-96 = 24rem = 384px).
-                    Ajuste 384px caso mude a largura da coluna esquerda. */}
-                <div
-                  className="min-w-0"
-                  style={{ maxWidth: 'calc(100% - 384px)' }} // garante que o conteúdo ocupe a largura restante sem invadir a coluna esquerda
-                >
-                  <h3
-                    className="text-2xl font-semibold text-gray-800 mb-1 break-words whitespace-normal"
-                    title={selectedContact.full_name}
-                  >
+            <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 overflow-auto">
+              <div className="flex items-start justify-between gap-4 flex-col md:flex-row">
+                <div className="min-w-0 w-full md:flex-1">
+                  <h3 className="text-2xl font-semibold text-gray-800 mb-1 break-words whitespace-normal" title={selectedContact.full_name}>
                     {selectedContact.full_name}
                   </h3>
                   <div className="text-sm text-gray-500 mb-3">
@@ -489,7 +477,7 @@ export default function ContactList() {
                   </div>
                 </div>
 
-                <div className="flex gap-2">
+                <div className="flex gap-2 mt-4 md:mt-0">
                   <button
                     onClick={() => openEditForm(selectedContact)}
                     className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition"
@@ -520,6 +508,7 @@ export default function ContactList() {
          )}
       </div>
 
+      {/* Formulário de contato (modal) */}
       {showForm && (
         <ContactForm
           clientId={editingContact ? editingContact.client_id : (newContactClientId || clients[0]?.id || '')}
