@@ -82,8 +82,9 @@ export default function Reports() {
   const totalContacts = clientsWithContacts.reduce((acc, client) => acc + client.contacts.length, 0);
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between print:hidden">
+    // container responsivo: limita largura, padding adaptativo e evita overflow
+    <div className="space-y-6 max-w-full mx-auto px-4 sm:px-6 lg:px-8 overflow-x-hidden">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 print:hidden">
         <div className="flex items-center gap-3">
           <div className="bg-orange-100 p-2 rounded-lg">
             <FileText className="w-6 h-6 text-orange-600" />
@@ -93,13 +94,16 @@ export default function Reports() {
             <p className="text-sm text-gray-600">Visualize todos os clientes e contatos</p>
           </div>
         </div>
-        <button
-          onClick={handlePrint}
-          className="flex items-center gap-2 bg-orange-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-orange-700 transition"
-        >
-          <Download className="w-5 h-5" />
-          Exportar PDF
-        </button>
+
+        <div className="w-full sm:w-auto flex gap-2 justify-start sm:justify-end">
+          <button
+            onClick={handlePrint}
+            className="flex items-center gap-2 bg-orange-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-orange-700 transition whitespace-nowrap"
+          >
+            <Download className="w-5 h-5" />
+            Exportar PDF
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 print:hidden">
@@ -128,7 +132,7 @@ export default function Reports() {
         </div>
       </div>
 
-      <div ref={printRef} className="bg-white rounded-xl shadow-sm p-8 print:shadow-none print:p-0">
+      <div ref={printRef} className="bg-white rounded-xl shadow-sm p-4 sm:p-6 md:p-8 print:shadow-none print:p-0 overflow-hidden">
         <div className="hidden print:block mb-8">
           <h1 className="text-3xl font-bold text-gray-800 mb-2">Relatório de Clientes e Contatos</h1>
           <p className="text-gray-600">
@@ -158,9 +162,8 @@ export default function Reports() {
                 {index > 0 && <hr className="my-8 border-gray-200 print:my-6" />}
 
                 <div className="mb-4">
-                  <div className="flex items-start gap-4 mb-3">
-                    <div className="w-14 h-14 rounded-xl overflow-hidden bg-gray-100 border border-gray-200 flex-shrink-0">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-3">
+                    <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0 border border-gray-200">
                       <img
                         src={clientAvatarMap[client.id] || FALLBACK_AVATAR}
                         alt={client.full_name || 'avatar'}
@@ -168,19 +171,19 @@ export default function Reports() {
                         onError={(e: any) => { e.currentTarget.src = FALLBACK_AVATAR; }}
                       />
                     </div>
-                    <div className="flex-1">
-                      <h3 className="text-xl font-bold text-gray-800">{client.full_name}</h3>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-lg sm:text-xl font-bold text-gray-800 break-words">{client.full_name}</h3>
                       <p className="text-sm text-gray-600">
                         Cadastrado em: {new Date(client.registration_date).toLocaleDateString('pt-BR')}
                       </p>
                     </div>
                   </div>
 
-                  <div className="ml-11 space-y-2 text-sm">
+                  <div className="ml-0 sm:ml-14 space-y-3 text-sm">
                     {client.emails.length > 0 && (
                       <div>
                         <span className="font-semibold text-gray-700">E-mails:</span>
-                        <span className="ml-2 text-gray-600">{client.emails.join(', ')}</span>
+                        <span className="ml-2 text-gray-600 break-words">{client.emails.join(', ')}</span>
                       </div>
                     )}
                     {client.phones.length > 0 && (
@@ -192,23 +195,23 @@ export default function Reports() {
                   </div>
                 </div>
 
-                <div className="ml-11">
+                <div className="ml-0 sm:ml-14">
                   <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
                     <UserCircle className="w-4 h-4" />
                     Contatos ({client.contacts.length})
                   </h4>
 
                   {client.contacts.length === 0 ? (
-                    <p className="text-sm text-gray-500 italic ml-6">Nenhum contato cadastrado</p>
+                    <p className="text-sm text-gray-500 italic ml-0 sm:ml-6">Nenhum contato cadastrado</p>
                   ) : (
                     <div className="space-y-3">
                       {client.contacts.map((contact) => (
-                        <div key={contact.id} className="ml-6 p-3 bg-gray-50 rounded-lg print:bg-white print:border print:border-gray-200">
+                        <div key={contact.id} className="ml-0 sm:ml-6 p-3 bg-gray-50 rounded-lg print:bg-white print:border print:border-gray-200">
                           <p className="font-medium text-gray-800 mb-1">{contact.full_name}</p>
                           <div className="space-y-1 text-sm text-gray-600">
                             {contact.emails.length > 0 && (
                               <div>
-                                <span className="font-medium">E-mails:</span> {contact.emails.join(', ')}
+                                <span className="font-medium">E-mails:</span> <span className="break-words">{contact.emails.join(', ')}</span>
                               </div>
                             )}
                             {contact.phones.length > 0 && (
