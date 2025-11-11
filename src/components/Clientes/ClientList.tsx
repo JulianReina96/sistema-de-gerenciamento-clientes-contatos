@@ -20,6 +20,9 @@ export default function ClientList() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
+  // Nova opção de ordenação: 'alphabetical' por padrão
+  const [orderBy, setOrderBy] = useState<'alphabetical' | 'registration'>('alphabetical');
+
   // Estado de expansão dos cards (set de ids)
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
 
@@ -34,7 +37,7 @@ export default function ClientList() {
 
   useEffect(() => {
     loadClients();
-  }, [user]);
+  }, [user, orderBy]); // recarrega ao mudar usuário ou opção de ordenação
 
   useEffect(() => {
     // Ao mudar a busca, volta para a primeira página
@@ -66,11 +69,15 @@ export default function ClientList() {
   const loadClients = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('clients')
-        .select('*')
-        .order('registration_date', { ascending: false });
+      
+      let query = supabase.from('clients').select('*');
+      if (orderBy === 'alphabetical') {
+        query = query.order('full_name', { ascending: true });
+      } else {
+        query = query.order('registration_date', { ascending: false });
+      }
 
+      const { data, error } = await query;
       if (error) throw error;
       setClients(data || []);
     } catch (error) {
