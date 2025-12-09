@@ -4,8 +4,7 @@ import Auth from './components/Auth/Auth';
 import ClientList from './components/Clientes/ClientList';
 import ContactList from './components/Contatos/ContactList';
 import Reports from './components/Relatorio/Reports';
-import { Users, UserCircle, FileText, LogOut } from 'lucide-react';
-import logo from './assets/logo.png';
+import { Users, UserCircle, FileText, LogOut, Calendar } from 'lucide-react';
 
 type TabType = 'clients' | 'contacts' | 'reports';
 
@@ -34,7 +33,9 @@ function Dashboard() {
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-3">
               <div className="bg-blue-600 p-2 rounded-lg">
-                <img src={logo} alt="Logo" className="w-6 h-6 object-contain" />
+                <div className="flex items-center justify-center">
+                  <Calendar className="w-6 h-6 text-white" />
+                </div>
               </div>
               <h1 className="text-xl font-bold text-gray-800">Sistema de Cadastro</h1>
             </div>

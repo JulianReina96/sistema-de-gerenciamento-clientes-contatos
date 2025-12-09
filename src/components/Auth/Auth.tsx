@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { LogIn } from 'lucide-react';
-import logo from '../../assets/logo.png';
+import { LogIn, Calendar } from 'lucide-react';
+// import logo from '../../assets/logo.png';
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
@@ -35,8 +35,8 @@ export default function Auth() {
     <div className="min-h-screen app-bg flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-8">
         <div className="flex items-center justify-center mb-8">
-          <div className="bg-blue-600 p-3 rounded-xl">
-            <img src={logo} alt="Logo" className="w-12 h-12 object-contain" />
+          <div className="bg-blue-600 p-3 rounded-xl flex items-center justify-center">
+            <Calendar className="w-12 h-12 text-white" />
           </div>
         </div>
 
